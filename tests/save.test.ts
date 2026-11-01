@@ -27,4 +27,10 @@ describe('Solitaire save codec',()=>{
   counter.payload.moves=-1;
   expect(()=>decodeSave(JSON.stringify(counter))).toThrow(/invalid counters/);
  });
+ it('rejects a nonempty pile with no exposed card and impossible waste visibility',()=>{
+  const bad=JSON.parse(encodeSave(new SolitaireSession('bad-pile',1)));bad.payload.tableau[0].faceUpCount=0;
+  expect(()=>decodeSave(JSON.stringify(bad))).toThrow(/face-up card/);
+  const waste=JSON.parse(encodeSave(new SolitaireSession('bad-waste',1)));waste.payload.waste.push(waste.payload.stock.pop());waste.payload.wasteVisibleFrom=1;
+  expect(()=>decodeSave(JSON.stringify(waste))).toThrow(/waste visibility/);
+ });
 });

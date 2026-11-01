@@ -55,3 +55,10 @@ No authored `solitaire-host.riv` asset is available. The header currently shows
 a clearly labeled procedural host preview. The Rive artboard, state machine,
 properties, triggers and reduced-motion animation must still be authored and
 tested, so the Rive/polish acceptance gate remains open.
+
+Tall tableau piles compress vertically so their bottom cards remain visible and
+selectable. Keyboard navigation highlights the focused column: use left/right
+arrows to choose a column and Enter to select its top card or move it to the
+focused tableau column. These keyboard controls currently handle top-card
+tableau-to-tableau moves only; use the pointer or touch for waste, foundations
+and longer runs. Space draws a card when the board has keyboard focus.

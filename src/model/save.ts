@@ -45,12 +45,13 @@ function assertUniqueCards(cards: Card[], label: string): void {
 function validatePiles(s: Record<string, unknown>, label: string): void {
   if (!Array.isArray(s.stock) || !s.stock.every(isCard)) fail(`${label} stock`);
   if (!Array.isArray(s.waste) || !s.waste.every(isCard)) fail(`${label} waste`);
-  if (!isInteger(s.wasteVisibleFrom, 0, s.waste.length)) fail(`${label} waste visibility`);
+  if (!isInteger(s.wasteVisibleFrom, 0, s.waste.length ? s.waste.length - 1 : 0)) fail(`${label} waste visibility`);
   if (!Array.isArray(s.tableau) || s.tableau.length !== TABLEAU_COUNT) fail(`${label} tableau`);
   for (const pile of s.tableau) {
     if (!pile || !Array.isArray(pile.cards) || !pile.cards.every(isCard) || !isInteger(pile.faceUpCount, 0, pile.cards.length)) {
       fail(`${label} tableau pile`);
     }
+    if (pile.cards.length && pile.faceUpCount === 0) fail(`${label} tableau has no face-up card`);
   }
   if (!Array.isArray(s.foundations) || s.foundations.length !== 4 || !s.foundations.every((pile) => Array.isArray(pile) && pile.every(isCard))) {
     fail(`${label} foundations`);

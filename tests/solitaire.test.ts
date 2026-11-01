@@ -48,3 +48,20 @@ describe('Solitaire rules',()=>{
   expect(uniqueCards(session)).toBe(true);
  });
 });
+
+describe('tableau and stock behavior',()=>{
+ it('moves an exposed run by source column, flips the source and supports undo',()=>{
+  const s=new SolitaireSession('fixture',1);s.tableau=[{cards:[4],faceUpCount:1},{cards:[9,7,19],faceUpCount:2},{cards:[21],faceUpCount:1},...Array.from({length:4},()=>({cards:[],faceUpCount:0}))];
+  const before=s.snapshot();const req:MoveRequest={from:'tableau',fromIndex:1,count:2,to:'tableau',toIndex:2};expect(s.commitMove(req)).toEqual({ok:true,reason:null});expect(s.tableau[1]).toEqual({cards:[9],faceUpCount:1});expect(s.tableau[2]).toEqual({cards:[21,7,19],faceUpCount:3});expect(s.undo()).toBe(true);expect(s.snapshot()).toEqual(before);
+ });
+ it('rejects hidden cards, same pile and invalid indices without changing state',()=>{
+  const s=new SolitaireSession('fixture',1);s.tableau[2]={cards:[9,7],faceUpCount:1};const before=s.snapshot();
+  for(const req of [{from:'tableau',fromIndex:2,count:2,to:'tableau',toIndex:1},{from:'tableau',fromIndex:2,count:1,to:'tableau',toIndex:2},{from:'tableau',fromIndex:99,count:1,to:'foundation',toIndex:0}] as MoveRequest[])expect(s.commitMove(req).ok).toBe(false);expect(s.snapshot()).toEqual(before);
+ });
+ it('draws the actual top card and restores stock order after recycling',()=>{
+  const s=new SolitaireSession('fixture',3);s.stock=[0,1,2,3];s.waste=[];s.wasteVisibleFrom=0;s.draw();expect(s.waste).toEqual([3,2,1]);expect(s.stock).toEqual([0]);s.draw();expect(s.waste).toEqual([3,2,1,0]);s.draw();expect(s.stock).toEqual([0,1,2,3]);expect(s.waste).toEqual([]);s.draw();expect(s.waste).toEqual([3,2,1]);expect(s.undo()).toBe(true);expect(s.stock).toEqual([0,1,2,3]);
+ });
+ it('moves only the exposed waste card, not an earlier card in the draw',()=>{
+  const s=new SolitaireSession('fixture',3);s.stock=[0,13,26];s.waste=[];s.wasteVisibleFrom=0;s.foundations=[[],[],[],[]];s.draw();expect(s.waste).toEqual([26,13,0]);expect(s.commitMove({from:'waste',fromIndex:0,count:1,to:'foundation',toIndex:2}).ok).toBe(false);expect(s.commitMove({from:'waste',fromIndex:2,count:1,to:'foundation',toIndex:0}).ok).toBe(true);expect(s.waste).toEqual([26,13]);expect(s.foundations[0]).toEqual([0]);
+ });
+});

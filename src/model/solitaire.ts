@@ -119,6 +119,7 @@ export class SolitaireSession {
     this.score = 0;
     this.moves = 0;
     this.redeals = 0;
+    this.elapsedMs = 0;
     this.undoStack = [];
     this.won = false;
   }
@@ -126,7 +127,7 @@ export class SolitaireSession {
   private sourceCards(request: MoveRequest): Card[] {
     if (request.from === "waste") return this.waste.slice(request.fromIndex);
     if (request.from === "foundation") return this.foundations[request.fromIndex].slice(-1);
-    return this.tableau[request.fromIndex].cards.slice(request.fromIndex);
+    return this.tableau[request.fromIndex].cards.slice(-request.count);
   }
 
   isValidMove(request: MoveRequest): boolean {
@@ -135,11 +136,14 @@ export class SolitaireSession {
 
   private validateMove(request: MoveRequest): string | null {
     if (request.count < 1 || !Number.isInteger(request.count)) return "invalid count";
+    if (!Number.isInteger(request.fromIndex) || !Number.isInteger(request.toIndex) || request.fromIndex < 0 || request.toIndex < 0 || !['waste','foundation','tableau'].includes(request.from) || !['foundation','tableau'].includes(request.to)) return "invalid pile";
+    if ((request.from === 'tableau' && request.fromIndex >= this.tableau.length) || (request.from === 'foundation' && request.fromIndex >= this.foundations.length) || (request.to === 'tableau' && request.toIndex >= this.tableau.length) || (request.to === 'foundation' && request.toIndex >= this.foundations.length)) return "invalid pile";
+    if (request.from === 'tableau' && request.to === 'tableau' && request.fromIndex === request.toIndex) return "choose a different pile";
     const source = this.sourceCards(request);
     if (source.length < request.count) return "not enough cards";
     const run = source.slice(0, request.count);
     if (request.from === "waste") {
-      if (request.fromIndex !== this.wasteVisibleFrom) return "card is not exposed";
+      if (request.fromIndex !== this.waste.length - 1) return "card is not exposed";
       if (request.count !== 1) return "waste moves one card";
     } else if (request.from === "foundation") {
       if (request.count !== 1) return "foundation moves one card";
@@ -147,8 +151,7 @@ export class SolitaireSession {
     } else {
       const pile = this.tableau[request.fromIndex];
       const faceUpStart = Math.max(0, pile.cards.length - pile.faceUpCount);
-      if (request.fromIndex < faceUpStart) return "card is face down";
-      if (request.to === "tableau" && request.fromIndex === 0) return "cannot move an entire tableau pile";
+      if (pile.cards.length - request.count < faceUpStart) return "card is face down";
       if (request.to === "tableau") {
         for (let i = 1; i < run.length; i += 1) {
           const below = run[i];
@@ -185,21 +188,19 @@ export class SolitaireSession {
     const run = this.sourceCards(request).slice(0, request.count);
     if (request.from === "waste") {
       this.waste.splice(request.fromIndex, request.count);
-      this.wasteVisibleFrom -= request.count;
+      this.wasteVisibleFrom = Math.max(0, this.waste.length - this.drawMode);
       this.score += request.to === "foundation" ? 10 : 5;
     } else if (request.from === "foundation") {
       this.foundations[request.fromIndex].pop();
       this.score -= 15;
     } else {
-      this.tableau[request.fromIndex].cards.splice(request.fromIndex, request.count);
+      this.tableau[request.fromIndex].cards.splice(-request.count, request.count);
       if (request.to === "foundation") this.score += 10;
-      const remaining = this.tableau[request.fromIndex].cards;
-      if (remaining.length === 0) this.tableau[request.fromIndex].faceUpCount = 0;
-      else if (remaining.length === this.tableau[request.fromIndex].faceUpCount) {
-        this.tableau[request.fromIndex].faceUpCount += 1;
-      }
+      const source = this.tableau[request.fromIndex];
+      source.faceUpCount -= request.count;
+      if (source.cards.length && source.faceUpCount === 0) source.faceUpCount = 1;
     }
-    if (request.to === "tableau") this.tableau[request.toIndex].cards.push(...run);
+    if (request.to === "tableau") { this.tableau[request.toIndex].cards.push(...run); this.tableau[request.toIndex].faceUpCount += run.length; }
     else this.foundations[request.toIndex].push(...run);
     this.moves += 1;
     this.won = this.foundations.reduce((sum, pile) => sum + pile.length, 0) === CARD_COUNT;
@@ -211,7 +212,7 @@ export class SolitaireSession {
     if (this.stock.length > 0) {
       this.pushUndo();
       const count = Math.min(this.drawMode, this.stock.length);
-      const drawn = this.stock.splice(-count, count);
+      const drawn = this.stock.splice(-count, count).reverse();
       this.waste.push(...drawn);
       this.wasteVisibleFrom = this.waste.length - Math.min(this.drawMode, this.waste.length);
       this.moves += 1;
@@ -219,7 +220,7 @@ export class SolitaireSession {
     }
     if (this.waste.length > 0) {
       this.pushUndo();
-      this.stock.push(...this.waste);
+      this.stock.push(...this.waste.reverse());
       this.waste = [];
       this.wasteVisibleFrom = 0;
       this.redeals += 1;
@@ -234,13 +235,13 @@ export class SolitaireSession {
       progress = false;
       const candidates: MoveRequest[] = [];
       if (this.waste.length > 0) {
-        candidates.push({ from: "waste", fromIndex: this.wasteVisibleFrom, count: 1, to: "foundation", toIndex: suitOf(this.waste[this.wasteVisibleFrom]) });
+        candidates.push({ from: "waste", fromIndex: this.waste.length-1, count: 1, to: "foundation", toIndex: suitOf(this.waste[this.waste.length-1]) });
       }
       for (let pile = 0; pile < TABLEAU_COUNT; pile += 1) {
         const cards = this.tableau[pile].cards;
         if (cards.length === 0) continue;
         const top = cards[cards.length - 1];
-        candidates.push({ from: "tableau", fromIndex: cards.length - 1, count: 1, to: "foundation", toIndex: suitOf(top) });
+        candidates.push({ from: "tableau", fromIndex: pile, count: 1, to: "foundation", toIndex: suitOf(top) });
       }
       for (const candidate of candidates) {
         if (this.commitMove(candidate).ok) {
@@ -257,18 +258,18 @@ export class SolitaireSession {
     const candidates: MoveRequest[] = [];
     if (this.waste.length > 0) {
       for (let pile = 0; pile < TABLEAU_COUNT; pile += 1) {
-        candidates.push({ from: "waste", fromIndex: this.wasteVisibleFrom, count: 1, to: "tableau", toIndex: pile });
+        candidates.push({ from: "waste", fromIndex: this.waste.length-1, count: 1, to: "tableau", toIndex: pile });
       }
-      candidates.push({ from: "waste", fromIndex: this.wasteVisibleFrom, count: 1, to: "foundation", toIndex: suitOf(this.waste[this.wasteVisibleFrom]) });
+      candidates.push({ from: "waste", fromIndex: this.waste.length-1, count: 1, to: "foundation", toIndex: suitOf(this.waste[this.waste.length-1]) });
     }
     for (let source = 0; source < TABLEAU_COUNT; source += 1) {
       const cards = this.tableau[source].cards;
       const faceUpStart = Math.max(0, cards.length - this.tableau[source].faceUpCount);
       for (let fromIndex = faceUpStart; fromIndex < cards.length; fromIndex += 1) {
         for (let dest = 0; dest < TABLEAU_COUNT; dest += 1) {
-          if (dest !== source) candidates.push({ from: "tableau", fromIndex, count: cards.length - fromIndex, to: "tableau", toIndex: dest });
+          if (dest !== source) candidates.push({ from: "tableau", fromIndex:source, count: cards.length - fromIndex, to: "tableau", toIndex: dest });
         }
-        candidates.push({ from: "tableau", fromIndex, count: 1, to: "foundation", toIndex: suitOf(cards[fromIndex]) });
+        if (fromIndex === cards.length-1) candidates.push({ from: "tableau", fromIndex:source, count: 1, to: "foundation", toIndex: suitOf(cards[fromIndex]) });
       }
     }
     for (let suit = 0; suit < 4; suit += 1) {
