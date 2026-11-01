@@ -1,47 +1,57 @@
-# Solitaire Table
+# Solitaire Table — desktop integration
 
-**Klondike cards · Phaser · single-player · phone required · flat-screen app**
+Solitaire Table is a desktop-native Klondike game with a 52-card seeded deal,
+draw-one and draw-three modes, tableau and foundation rules, undo, hints,
+explicit auto-foundation and local move/time feedback.
 
-> Planned design, not implemented or browser-tested. `index.pseudo.mjs` is an explanatory entry point, not a playable game.
+The app exports a synchronous `mount(host)` and disposes its canvas loop,
+listeners, account-file subscription and audio context idempotently. Save and
+Open use the signed-in desktop's My files through
+`host.storage.mirrorFileContext()`. Files contain the logical stock, waste,
+tableau, foundations, undo stack and counters; loading validates the document
+before replacement and resumes paused.
 
-## Experience
+Desktop play supports selection by pointer, Space to draw, Escape to pause,
+Ctrl/Cmd+Z to undo and H for a hint. The phone layout retains large controls and
+round-trippable save/open actions.
 
-A tactile single-player Klondike table with forgiving touch selection, clear legal-drop feedback and honest deal outcomes.
+The game pauses on browser blur, desktop focus loss, workspace changes,
+minimization and roll-up. Save captures the exact paused state and destination
+before touching storage; Open and New deal reject stale results if the table
+changed while a confirmation was open. Controls stay locked until the file
+operation finishes, and closing during a save remains protected by the desktop
+dirty-state guard.
 
-## What this demonstrates
+## Verification
 
-- Layered sprites and z-order
-- Drag hit-testing and responsive layout
-- Undo transactions and smooth card animation
+```sh
+npm ci --prefix apps/system/solitaire --ignore-scripts
+npm run typecheck --prefix apps/system/solitaire
+npm test --prefix apps/system/solitaire
+python3 active-system/scripts/build-public-apps.py --output .build/solitaire-test --apps solitaire
+cp tests/solitaire-fixture.html .build/solitaire-test/index.html
+python3 -m http.server 18341 --bind 127.0.0.1 --directory .build/solitaire-test
+CODI_TEST_CDP=http://127.0.0.1:19341 CODI_SOLITAIRE_URL=http://127.0.0.1:18341/ CODI_SOLITAIRE_MANIFEST=.build/solitaire-test/apps.json node tests/solitaire-browser.test.mjs
+CODI_TEST_CDP=http://127.0.0.1:19341 CODI_SOLITAIRE_URL=http://127.0.0.1:18341/ CODI_SOLITAIRE_MANIFEST=.build/solitaire-test/apps.json CODI_PHONE=1 node tests/solitaire-browser.test.mjs
+CODI_TEST_CDP=http://127.0.0.1:19341 CODI_TEST_URL=http://127.0.0.1:18345/ node tests/solitaire-account.test.mjs
+```
 
-## Rules and complete loop
+The focused suite covers card conservation, invalid-move atomicity, undo,
+draw/redeal order, save validation, mount/disposal, the two-window desktop and
+phone harness, focus pause, save locking, and an isolated real-account workflow.
+Physical-phone testing and a complete deal-to-victory playthrough remain open.
 
-- 52 unique cards; seven tableau columns; descending alternating-color sequences; foundations ascending by suit.
-- Draw-one and draw-three are explicit modes. Redeals use a documented policy. Legal move applies atomically before its visual tween.
-- Hints identify legal moves, not a guaranteed solution. Random deals are not labeled solvable. Victory only when all cards reach foundations.
+Saving pauses the table before taking its snapshot, holds conflicting controls
+at that boundary, and reports later edits as unsaved. Opening a replacement
+captures the current table and rejects a stale result if it changes while a
+confirmation or file read is pending. Losing desktop-window focus, minimizing,
+rolling up, switching workspaces or leaving the browser pauses the game; Resume
+is explicit. Imported saves are bounded to 52 unique cards with valid tableau,
+foundation, undo and counter state.
 
-## Bounded polished release
+## Current limitation
 
-One polished deck/backs, draw-one and draw-three, seeded deals and local move/time statistics.
-
-- Enlarged touch targets without hiding cards behind toolbar
-- Auto-foundation requires explicit user action
-- Card sounds independent from victory music and mute
-
-No multiplayer, accounts, server simulation or generic editor is required. Start, rules/help, play/activity, pause, outcome/goal feedback and retry must all be complete. Settings include volume/mute, reduced motion, contrast and game-specific options where meaningful. State changes occur in the game model; animations illustrate them.
-
-## Rive inside this app
-
-Friendly table host in header and completion sequence, not each card. The requested asset is `solitaire-host.riv`; it is **not included**. See [RIVE.md](RIVE.md) for the authoring/integration contract. A placeholder or unrelated animated logo does not satisfy this requirement.
-
-## Save behavior
-
-Logical piles, visibility and undo transactions; no saved sprite coordinates. See [SAVE.md](SAVE.md). Loading starts paused; resume is explicit. Restart and load cancel stale callbacks and any owned AI work.
-
-## Build sequence
-
-Implement the rule loop in [gameplay.pseudo.txt](gameplay.pseudo.txt); bind the exact app lifecycle from [index.pseudo.mjs](index.pseudo.mjs); complete [CONTROLS.md](CONTROLS.md); author/integrate [RIVE.md](RIVE.md); then satisfy [ACCEPTANCE.md](ACCEPTANCE.md). Do not add XR or a 3D engine solely to widen the technology list.
-
-Target wave: **2**. Integrator first reads [AGENTS.md](../../AGENTS.md); do not guess host APIs from symbolic helper names.
-
-Use original/licensed artwork and audio. Keep the scope small enough to polish; expand content only after the release gates pass.
+No authored `solitaire-host.riv` asset is available. The header currently shows
+a clearly labeled procedural host preview. The Rive artboard, state machine,
+properties, triggers and reduced-motion animation must still be authored and
+tested, so the Rive/polish acceptance gate remains open.
