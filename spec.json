@@ -1,0 +1,121 @@
+{
+  "category": "01-phaser-arcade",
+  "id": "solitaire",
+  "title": "Solitaire Table",
+  "genre": "Klondike cards",
+  "pitch": "A tactile single-player Klondike table with forgiving touch selection, clear legal-drop feedback and honest deal outcomes.",
+  "capabilities": [
+    "Layered sprites and z-order",
+    "Drag hit-testing and responsive layout",
+    "Undo transactions and smooth card animation"
+  ],
+  "rules": [
+    "52 unique cards; seven tableau columns; descending alternating-color sequences; foundations ascending by suit.",
+    "Draw-one and draw-three are explicit modes. Redeals use a documented policy. Legal move applies atomically before its visual tween.",
+    "Hints identify legal moves, not a guaranteed solution. Random deals are not labeled solvable. Victory only when all cards reach foundations."
+  ],
+  "content": "One polished deck/backs, draw-one and draw-three, seeded deals and local move/time statistics.",
+  "state": [
+    "card IDs and all pile orderings",
+    "face-up flags",
+    "stock/waste position",
+    "draw and redeal rule",
+    "undo transaction stack",
+    "move count and active elapsed time"
+  ],
+  "actions": [
+    {
+      "command": "move-cards",
+      "desktop": "Drag a card/run, or click source then destination",
+      "phone": "Tap-select and tap-destination; drag optional",
+      "xr": "Not applicable; plays as a flat browser app."
+    },
+    {
+      "command": "draw",
+      "desktop": "Click stock / Space when focused",
+      "phone": "Stock tap",
+      "xr": "Not applicable; plays as a flat browser app."
+    },
+    {
+      "command": "undo",
+      "desktop": "Undo button / Ctrl+Z within app",
+      "phone": "Large Undo button",
+      "xr": "Not applicable; plays as a flat browser app."
+    },
+    {
+      "command": "hint",
+      "desktop": "Hint button",
+      "phone": "Hint button",
+      "xr": "Not applicable; plays as a flat browser app."
+    }
+  ],
+  "rive": {
+    "asset": "solitaire-host.riv",
+    "role": "Friendly table host in header and completion sequence, not each card.",
+    "properties": {
+      "moves": "integer >=0",
+      "remaining": "integer 0..52"
+    },
+    "events": [
+      "hint",
+      "win",
+      "invalidMove"
+    ],
+    "states": [
+      "idle",
+      "thinking",
+      "cheer"
+    ],
+    "artboard": "Main",
+    "stateMachine": "Presentation",
+    "assetStatus": "to_author"
+  },
+  "polish": [
+    "Enlarged touch targets without hiding cards behind toolbar",
+    "Auto-foundation requires explicit user action",
+    "Card sounds independent from victory music and mute"
+  ],
+  "tests": [
+    "Card count and uniqueness remain 52 after every move.",
+    "Invalid drop changes no pile.",
+    "Undo restores reveal, stock and score together.",
+    "Double-tap cannot move one card twice.",
+    "Portrait overlap still permits selecting each exposed rank.",
+    "Save/load preserves exact stock order and draw-three offset."
+  ],
+  "loop": [
+    "resolve pointer to card/run using current pile layout",
+    "validate requested move against selected rule set",
+    "commit a reversible transaction",
+    "animate views to committed pile positions",
+    "test all foundations for victory; never infer from animation completion"
+  ],
+  "save": "Logical piles, visibility and undo transactions; no saved sprite coordinates.",
+  "wave": 2,
+  "specVersion": 1,
+  "status": "planned",
+  "implementation": "not_started",
+  "runtimeTests": "not_run",
+  "engine": "Phaser",
+  "singlePlayer": true,
+  "phoneRequired": true,
+  "mountContract": {
+    "export": "mount",
+    "synchronous": true,
+    "returns": [
+      "element",
+      "dispose"
+    ],
+    "productionEntry": "index.mjs",
+    "suppliedEntry": "index.pseudo.mjs"
+  },
+  "xrRequired": false,
+  "riveRequired": true,
+  "riveAssetIncluded": false,
+  "documentKind": "Logical piles, visibility and undo transactions; no saved sprite coordinates.",
+  "sources": [
+    "S01",
+    "S02",
+    "S03"
+  ]
+}
