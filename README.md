@@ -25,9 +25,9 @@ dirty-state guard.
 ## Verification
 
 ```sh
-npm ci --prefix apps/system/solitaire --ignore-scripts
-npm run typecheck --prefix apps/system/solitaire
-npm test --prefix apps/system/solitaire
+npm ci --prefix apps/games/01-phaser-arcade/solitaire --ignore-scripts
+npm run typecheck --prefix apps/games/01-phaser-arcade/solitaire
+npm test --prefix apps/games/01-phaser-arcade/solitaire
 python3 active-system/scripts/build-public-apps.py --output .build/solitaire-test --apps solitaire
 cp tests/solitaire-fixture.html .build/solitaire-test/index.html
 python3 -m http.server 18341 --bind 127.0.0.1 --directory .build/solitaire-test
