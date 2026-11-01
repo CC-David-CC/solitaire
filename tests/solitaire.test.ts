@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {CARD_COUNT,SolitaireSession,type MoveRequest} from '../src/model/solitaire.js';
+import {encodeSave,decodeSave,sessionFromSave} from '../src/model/save.js';
 
 function uniqueCards(session:SolitaireSession):boolean{
  const cards=session.allCards();
@@ -73,5 +74,24 @@ describe('winning and restoring a completed deal',()=>{
   s.tableau=Array.from({length:7},(_,pile)=>pile<4?{cards:[pile*13+12],faceUpCount:1}:{cards:[],faceUpCount:0});
   const before=s.snapshot();for(let pile=0;pile<4;pile++){expect(s.commitMove({from:'tableau',fromIndex:pile,count:1,to:'foundation',toIndex:pile}).ok).toBe(true);expect(s.allCards()).toHaveLength(52);expect(new Set(s.allCards()).size).toBe(52)}
   expect(s.won).toBe(true);expect(s.foundations.map(p=>p.length)).toEqual([13,13,13,13]);expect(s.moves).toBe(before.moves+4);expect(s.undo()).toBe(true);expect(s.won).toBe(false);expect(s.tableau[3].cards).toEqual([51]);expect(s.commitMove({from:'tableau',fromIndex:3,count:1,to:'foundation',toIndex:3}).ok).toBe(true);expect(s.won).toBe(true);
+ });
+});
+
+describe('long-running deal invariants',()=>{
+ it('keeps every card and playable pile valid over multiple seeded games and undo cycles',()=>{
+  let transitions=0;for(let seed=0;seed<12;seed++){
+   const s=new SolitaireSession(`invariant-${seed}`,seed%2?1:3);let previous='';
+   for(let step=0;step<160;step++){
+    transitions++;const hint=s.hint();const before=JSON.stringify(s.snapshot());
+    if(hint&&step%5!==4){expect(s.commitMove(hint).ok).toBe(true)}else s.draw();
+    if(step%17===16&&s.undoStack.length){expect(s.undo()).toBe(true)}
+    const cards=s.allCards();expect(cards).toHaveLength(52);expect(new Set(cards).size).toBe(52);
+    for(const p of s.tableau){expect(p.faceUpCount).toBeGreaterThanOrEqual(p.cards.length?1:0);expect(p.faceUpCount).toBeLessThanOrEqual(p.cards.length)}
+    expect(s.wasteVisibleFrom).toBeGreaterThanOrEqual(0);expect(s.wasteVisibleFrom).toBeLessThanOrEqual(s.waste.length? s.waste.length-1:0);
+    if(step%19===0)expect(sessionFromSave(decodeSave(encodeSave(s))).snapshot()).toEqual(s.snapshot());
+    if(s.won)break;const after=JSON.stringify(s.snapshot());if(after===before&&after===previous)break;previous=after;
+   }
+  }
+  expect(transitions).toBeGreaterThan(150);
  });
 });

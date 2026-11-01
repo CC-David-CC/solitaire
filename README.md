@@ -64,3 +64,5 @@ tableau-to-tableau moves only; use the pointer or touch for waste, foundations
 and longer runs. Space draws a card when the board has keyboard focus.
 
 A constructed near-win state was exercised on live desktop and phone-sized browser views: the last king was moved to its foundation, the winning state synced to the server, and a fresh browser reopened it. A model test also moves all four final kings, verifies all 52 cards and undoes/replays the win. These checks do not establish a full deal-to-victory playthrough or physical touch.
+
+A model invariant test also follows more than 150 actions across 12 seeded deals, checking card conservation, face-up counts, undo and save-state round trips. It is automated coverage rather than a complete human-played deal.
