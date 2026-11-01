@@ -62,3 +62,5 @@ arrows to choose a column and Enter to select its top card or move it to the
 focused tableau column. These keyboard controls currently handle top-card
 tableau-to-tableau moves only; use the pointer or touch for waste, foundations
 and longer runs. Space draws a card when the board has keyboard focus.
+
+A constructed near-win state was exercised on live desktop and phone-sized browser views: the last king was moved to its foundation, the winning state synced to the server, and a fresh browser reopened it. A model test also moves all four final kings, verifies all 52 cards and undoes/replays the win. These checks do not establish a full deal-to-victory playthrough or physical touch.

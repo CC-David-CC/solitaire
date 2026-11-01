@@ -65,3 +65,13 @@ describe('tableau and stock behavior',()=>{
   const s=new SolitaireSession('fixture',3);s.stock=[0,13,26];s.waste=[];s.wasteVisibleFrom=0;s.foundations=[[],[],[],[]];s.draw();expect(s.waste).toEqual([26,13,0]);expect(s.commitMove({from:'waste',fromIndex:0,count:1,to:'foundation',toIndex:2}).ok).toBe(false);expect(s.commitMove({from:'waste',fromIndex:2,count:1,to:'foundation',toIndex:0}).ok).toBe(true);expect(s.waste).toEqual([26,13]);expect(s.foundations[0]).toEqual([0]);
  });
 });
+
+describe('winning and restoring a completed deal',()=>{
+ it('moves the four remaining kings to foundations and can undo and replay the win',()=>{
+  const s=new SolitaireSession('winning',1);s.stock=[];s.waste=[];s.wasteVisibleFrom=0;
+  s.foundations=Array.from({length:4},(_,suit)=>Array.from({length:12},(_,rank)=>suit*13+rank));
+  s.tableau=Array.from({length:7},(_,pile)=>pile<4?{cards:[pile*13+12],faceUpCount:1}:{cards:[],faceUpCount:0});
+  const before=s.snapshot();for(let pile=0;pile<4;pile++){expect(s.commitMove({from:'tableau',fromIndex:pile,count:1,to:'foundation',toIndex:pile}).ok).toBe(true);expect(s.allCards()).toHaveLength(52);expect(new Set(s.allCards()).size).toBe(52)}
+  expect(s.won).toBe(true);expect(s.foundations.map(p=>p.length)).toEqual([13,13,13,13]);expect(s.moves).toBe(before.moves+4);expect(s.undo()).toBe(true);expect(s.won).toBe(false);expect(s.tableau[3].cards).toEqual([51]);expect(s.commitMove({from:'tableau',fromIndex:3,count:1,to:'foundation',toIndex:3}).ok).toBe(true);expect(s.won).toBe(true);
+ });
+});
