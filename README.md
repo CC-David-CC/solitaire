@@ -39,7 +39,11 @@ CODI_TEST_CDP=http://127.0.0.1:19341 CODI_TEST_URL=http://127.0.0.1:18345/ node 
 The focused suite covers card conservation, invalid-move atomicity, undo,
 draw/redeal order, save validation, mount/disposal, the two-window desktop and
 phone harness, focus pause, save locking, and an isolated real-account workflow.
-Physical-phone testing and a complete deal-to-victory playthrough remain open.
+Physical-phone testing remains open. A solver-generated, seeded draw-one deal
+was replayed through all 126 actions on the actual board using desktop mouse
+and emulated-phone touch; both reached victory, synchronized the resulting
+save and reopened it in a fresh browser. This proves that particular deal and
+sequence, not every deal, draw-three play or physical touch.
 
 Saving pauses the table before taking its snapshot, holds conflicting controls
 at that boundary, and reports later edits as unsaved. Opening a replacement
@@ -63,6 +67,12 @@ focused tableau column. These keyboard controls currently handle top-card
 tableau-to-tableau moves only; use the pointer or touch for waste, foundations
 and longer runs. Space draws a card when the board has keyboard focus.
 
-A constructed near-win state was exercised on live desktop and phone-sized browser views: the last king was moved to its foundation, the winning state synced to the server, and a fresh browser reopened it. A model test also moves all four final kings, verifies all 52 cards and undoes/replays the win. These checks do not establish a full deal-to-victory playthrough or physical touch.
+A constructed near-win state was exercised on live desktop and phone-sized browser views: the last king was moved to its foundation, the winning state synced to the server, and a fresh browser reopened it. A model test also moves all four final kings, verifies all 52 cards and undoes/replays the win. The later complete-deal replay is described above.
 
 A model invariant test also follows more than 150 actions across 12 seeded deals, checking card conservation, face-up counts, undo and save-state round trips. It is automated coverage rather than a complete human-played deal.
+
+While a save is in progress, board input, keyboard shortcuts, draw-mode
+changes, and the touch controls cannot modify the game. Local desktop and
+phone-sized registered-account tests held a write open, tried Undo, resume and
+draw through both controls and keyboard, then verified the saved move and undo
+history after synchronization and fresh-browser reopening.
