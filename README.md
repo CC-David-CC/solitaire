@@ -76,3 +76,7 @@ changes, and the touch controls cannot modify the game. Local desktop and
 phone-sized registered-account tests held a write open, tried Undo, resume and
 draw through both controls and keyboard, then verified the saved move and undo
 history after synchronization and fresh-browser reopening.
+
+## Design requirements
+
+The original [design brief, controls, save rules, artwork and acceptance plans](design/README.md) are retained as reference. They describe targets; the implementation and qualification status above takes precedence.
