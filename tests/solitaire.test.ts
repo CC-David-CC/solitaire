@@ -1,6 +1,6 @@
-import {describe,expect,it} from 'vitest';
-import {CARD_COUNT,SolitaireSession,type MoveRequest} from '../src/model/solitaire.js';
-import {encodeSave,decodeSave,sessionFromSave} from '../src/model/save.js';
+import {describe,expect,it} from './test-shim.ts';
+import {CARD_COUNT,SolitaireSession,type MoveRequest} from '../src/model/solitaire.ts';
+import {encodeSave,decodeSave,sessionFromSave} from '../src/model/save.ts';
 
 function uniqueCards(session:SolitaireSession):boolean{
  const cards=session.allCards();

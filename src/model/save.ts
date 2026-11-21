@@ -1,4 +1,4 @@
-import { CARD_COUNT, TABLEAU_COUNT, SolitaireSession, rankOf, suitOf, type Card, type SolitaireSnapshot } from "./solitaire.js";
+import { CARD_COUNT, TABLEAU_COUNT, SolitaireSession, rankOf, suitOf, type Card, type SolitaireSnapshot } from "./solitaire.ts";
 
 export const SAVE_FORMAT = "ksu.game.save";
 export const SAVE_SCHEMA_VERSION = 1;
@@ -16,8 +16,10 @@ export interface SolitaireSaveEnvelope {
 }
 
 export class SaveError extends Error {
-  constructor(readonly reason: string) {
+  readonly reason: string;
+  constructor(reason: string) {
     super(`solitaire save rejected: ${reason}`);
+    this.reason = reason;
     this.name = "SaveError";
   }
 }

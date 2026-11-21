@@ -1,4 +1,4 @@
-import { Rng } from "./rng.js";
+import { Rng } from "./rng.ts";
 
 export type Card = number;
 export type Suit = 0 | 1 | 2 | 3;

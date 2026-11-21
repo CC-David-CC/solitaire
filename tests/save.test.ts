@@ -1,6 +1,6 @@
-import {describe,expect,it} from 'vitest';
-import {decodeSave,encodeSave,SAVE_APP_ID,sessionFromSave} from '../src/model/save.js';
-import {SolitaireSession} from '../src/model/solitaire.js';
+import {describe,expect,it} from './test-shim.ts';
+import {decodeSave,encodeSave,SAVE_APP_ID,sessionFromSave} from '../src/model/save.ts';
+import {SolitaireSession} from '../src/model/solitaire.ts';
 
 describe('Solitaire save codec',()=>{
  it('round-trips exact logical state including stock and undo',()=>{

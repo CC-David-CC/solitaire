@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run tests"
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
   "devDependencies": {
-    "typescript": "7.0.2",
-    "vitest": "5.0.5"
+    "typescript": "7.0.2"
   }
 }

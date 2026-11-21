@@ -1,5 +1,5 @@
-import {describe,expect,it} from 'vitest';
-import {mount} from '../src/mount.js';
+import {describe,expect,it} from './test-shim.ts';
+import {mount} from '../src/mount.ts';
 
 function make(_tag:string,className='',text=''):HTMLElement{
  const classes=new Set(className.split(/\s+/).filter(Boolean));

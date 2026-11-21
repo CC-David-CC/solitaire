@@ -1,22 +1,170 @@
-.solitaire-app{background:#e8efe9;color:#16352d;overflow:auto;padding:8px}
-.solitaire-view{display:flex;flex-direction:column;gap:8px;min-height:100%}
-.solitaire-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.solitaire-heading{margin:0;font-size:20px}
-.solitaire-rive-pending{max-width:34ch;padding:8px 10px;border:1px dashed #718f80;border-radius:10px;background:#f7fbf8;color:#526b5e;font-size:12px}
-.solitaire-toolbar,.solitaire-controls,.solitaire-save-fields{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.solitaire-toolbar button,.solitaire-toolbar select,.solitaire-controls button,.solitaire-save-fields button{min-height:40px}
-.solitaire-toolbar button,.solitaire-controls button{flex:1 1 92px}
-.solitaire-board{display:block;width:100%;max-width:760px;aspect-ratio:636/620;border-radius:12px;touch-action:manipulation;outline-offset:3px;background:#145847;box-shadow:0 5px 18px #153b301c}
-.solitaire-board:focus-visible{outline:3px solid #d49e2f}
-.solitaire-controls{max-width:760px}
-.solitaire-view details{gap:6px}
-.solitaire-view summary{cursor:pointer;min-height:32px}
-.solitaire-view details p{max-width:75ch;margin:4px 0 8px}
-.solitaire-setting{display:inline-flex;align-items:center;gap:7px;margin:0 14px 7px 0}
-.solitaire-setting input[type=checkbox]{width:20px;height:20px}
-.solitaire-setting input[type=range]{width:130px}
-.solitaire-save-fields input{min-width:180px;flex:1}
-.solitaire-warning{padding:8px;border:1px solid #b27a15;background:#fff4cf;color:#593900}
-.solitaire-warning[hidden]{display:none}
-.solitaire-app .app-status{font-size:13px}
-@media(max-width:600px){.solitaire-app{padding:5px}.solitaire-header{align-items:flex-start;flex-direction:column;gap:4px}.solitaire-rive-pending{max-width:none}.solitaire-toolbar button,.solitaire-toolbar select,.solitaire-controls button,.solitaire-save-fields button{min-height:44px}.solitaire-board{max-width:none}.solitaire-setting{width:100%;justify-content:space-between}.solitaire-setting input[type=range]{width:55%}}
+.solitaire-app {
+  background: #e8efe9;
+  color: #16352d;
+  overflow: auto;
+  padding: 8px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.solitaire-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100%;
+}
+.solitaire-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.solitaire-heading {
+  margin: 0;
+  font-size: 20px;
+}
+.solitaire-rive-pending {
+  max-width: 42ch;
+  padding: 6px 10px;
+  border: 1px dashed #718f80;
+  border-radius: 8px;
+  background: #f7fbf8;
+  color: #526b5e;
+  font-size: 11px;
+}
+.solitaire-toolbar, .solitaire-controls, .solitaire-save-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.solitaire-toolbar button, .solitaire-toolbar select, .solitaire-controls button, .solitaire-save-fields button {
+  min-height: 38px;
+  border: 1px solid #8fad9d;
+  border-radius: 6px;
+  background: #f7fbf8;
+  color: #16352d;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-weight: 500;
+}
+.solitaire-toolbar button:hover, .solitaire-controls button:hover {
+  background: #e1ede4;
+}
+.solitaire-toolbar button, .solitaire-controls button {
+  flex: 1 1 92px;
+}
+.solitaire-board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  flex: 1 1 auto;
+  border-radius: 12px;
+  touch-action: manipulation;
+  outline-offset: 3px;
+  background: #145847;
+  box-shadow: 0 5px 18px #153b301c;
+}
+.solitaire-board:focus-visible {
+  outline: 3px solid #d49e2f;
+}
+.solitaire-view details {
+  gap: 6px;
+}
+.solitaire-view summary {
+  cursor: pointer;
+  min-height: 30px;
+  font-weight: 600;
+}
+.solitaire-view details p {
+  max-width: 80ch;
+  margin: 4px 0 8px;
+}
+.solitaire-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 14px 7px 0;
+}
+.solitaire-setting input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+}
+.solitaire-setting input[type=range] {
+  width: 130px;
+}
+.solitaire-save-fields input {
+  min-width: 180px;
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #8fad9d;
+  border-radius: 6px;
+}
+.solitaire-warning {
+  padding: 8px 12px;
+  border: 1px solid #b27a15;
+  background: #fff4cf;
+  color: #593900;
+  border-radius: 6px;
+}
+.solitaire-warning[hidden] {
+  display: none;
+}
+.solitaire-app .app-status {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Tier 1: Simplified Phone Display (< 768px) */
+@media (max-width: 768px) {
+  .solitaire-app {
+    padding: 4px;
+  }
+  .solitaire-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .solitaire-rive-pending {
+    display: none;
+  }
+  .solitaire-toolbar button, .solitaire-toolbar select, .solitaire-controls button, .solitaire-save-fields button {
+    min-height: 44px;
+    flex: 1 1 76px;
+    font-size: 13px;
+  }
+  .solitaire-board {
+    min-height: 400px;
+    border-radius: 8px;
+  }
+  .solitaire-setting {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .solitaire-setting input[type=range] {
+    width: 55%;
+  }
+}
+
+/* Tier 3: Complete 4K UHD Display (>= 2560px) */
+@media (min-width: 2560px) {
+  .solitaire-app {
+    padding: 16px;
+    font-size: 16px;
+  }
+  .solitaire-heading {
+    font-size: 28px;
+  }
+  .solitaire-toolbar button, .solitaire-toolbar select, .solitaire-controls button, .solitaire-save-fields button {
+    min-height: 48px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+  .solitaire-board {
+    min-height: 760px;
+    border-radius: 16px;
+  }
+  .solitaire-app .app-status {
+    font-size: 16px;
+  }
+}
