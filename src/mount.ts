@@ -21,7 +21,7 @@ export function mount(host: {
   let disposed = false;
 
   queueMicrotask(() => {
-    void import("./view/run.js")
+    void import("./view/run.ts")
       .then(async ({startView}) => {
         if (disposed || controller.signal.aborted) return;
         const started = await startView(host as never, controller.signal);

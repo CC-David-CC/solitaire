@@ -1,4 +1,4 @@
-import {SynthAudio} from '../audio/synth.js';
+import {SynthAudio} from '../audio/synth.ts';
 import {cardKey,isRed,SolitaireSession,TABLEAU_COUNT,type Card,type MoveRequest,type PileState} from '../model/solitaire.ts';
 import {decodeSave,encodeSave,sessionFromSave} from '../model/save.ts';
 
